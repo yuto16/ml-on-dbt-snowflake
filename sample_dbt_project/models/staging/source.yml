@@ -11,6 +11,3 @@ sources:
       - name: products
       - name: supplies
       - name: stores
-
-models:
-  # staging/mart models will be defined after stg/mart SQLs are updated
