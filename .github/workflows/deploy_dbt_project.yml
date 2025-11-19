@@ -5,22 +5,24 @@ on:
     branches:
       - develop
     paths:
-      - 'sample_dbt_project/**' # dbtプロジェクトが含まれるディレクトリを指定（ルートにある場合は不要）
+      - 'sample_dbt_project/**' # トリガー条件
 
 env:
-  # Snowflake CLI用の環境変数設定
-  # connection "WORKFLOW" を定義します
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_ACCOUNT: ${{ vars.SNOWFLAKE_ACCOUNT }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_USER: ${{ vars.SNOWFLAKE_USER }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_PASSWORD: ${{ secrets.SNOWFLAKE_PAT }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
+  # 変数名をシンプルにして、ステップ内で使いやすくします
+  # ※GitHubのSettings > Secrets / Variables に値が設定されている前提です
+  SNOWFLAKE_ACCOUNT: ${{ vars.SNOWFLAKE_ACCOUNT }}
+  SNOWFLAKE_USER: ${{ vars.SNOWFLAKE_USER }}
+  SNOWFLAKE_PAT: ${{ secrets.SNOWFLAKE_PAT }} # パスワード(トークン)は必ずSecretsから
+  SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
+  SNOWFLAKE_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
+  SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+  SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
   
-  # CI実行用の一意なプロジェクト名を生成 (例: my_project_pr_123)
-  # 既存のプロジェクトと被らないようにします
+  # プロジェクト名 (CI実行ごとにユニークにする)
   DBT_PROJECT_NAME: "ci_dbt_${{ github.event.number }}_${{ github.run_id }}"
+  
+  # プロジェクトがあるサブディレクトリ名
+  PROJECT_DIR: "sample_dbt_project"
 
 jobs:
   dbt-ci:
@@ -35,53 +37,63 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install snowflake-cli
+      # 公式Actionを使う場合も、単にインストールするだけでOKです
+      - name: Install Snowflake CLI
         uses: Snowflake-Labs/snowflake-cli-action@v2.0
         with:
           cli-version: "latest"
-          default-config-file-path: 'config/config.toml'
-          snow --version
+          # ここに snow --version 等は書きません
 
-      - name: Configure Connection
+      - name: Check Version
+        run: snow --version
+
+      - name: Create Config File
         run: |
-          # ここで "default" という名前の接続を明示的に作成します。
-          # これにより、以降のコマンドはオプションなしでこの接続を使用します。
+          # 「snow connection add」はパスワード入力待ちで止まるため使いません。
+          # 直接configファイルを生成するこの方法が最も確実です。
           
-          snow connection add \
-            --connection-name default \
-            --account "$SNOWFLAKE_ACCOUNT" \
-            --user "$SNOWFLAKE_USER" \
-            --password "$SNOWFLAKE_PAT" \
-            --role "$SNOWFLAKE_ROLE" \
-            --warehouse "$SNOWFLAKE_WAREHOUSE" \
-            --database "$SNOWFLAKE_DATABASE" \
-            --schema "$SNOWFLAKE_SCHEMA"
+          mkdir -p ~/.snowflake
+
+          cat << EOF > ~/.snowflake/config.toml
+          default_connection_name = "default"
+
+          [connections.default]
+          account = "$SNOWFLAKE_ACCOUNT"
+          user = "$SNOWFLAKE_USER"
+          password = "$SNOWFLAKE_PAT"
+          role = "$SNOWFLAKE_ROLE"
+          warehouse = "$SNOWFLAKE_WAREHOUSE"
+          database = "$SNOWFLAKE_DATABASE"
+          schema = "$SNOWFLAKE_SCHEMA"
+          EOF
+
+          chmod 600 ~/.snowflake/config.toml
 
       - name: Verify Connection
-        run: |
-          # 接続確認（PAT認証が通るかテスト）
-          snow connection test
+        run: snow connection test
 
       - name: Deploy dbt Project (Temporary)
         run: |
           echo "Deploying temporary dbt project: $DBT_PROJECT_NAME"
           
-          # Snowflake上にdbtプロジェクトをデプロイ
-          # プロジェクトのディレクトリがルートでない場合はルートへ移動するかパスを指定してください
-          # 例: cd dbt_project && snow dbt deploy ...
+          # 【重要】dbtプロジェクトのあるディレクトリへ移動します
+          cd "$PROJECT_DIR"
           
-          snow dbt deploy --project-name "$DBT_PROJECT_NAME" --replace
+          # 【重要】最新CLIに合わせて構文を修正: --project-name は使いません
+          # snow dbt deploy <プロジェクト名> --force
+          snow dbt deploy "$DBT_PROJECT_NAME" --force
 
       - name: Run dbt (snow dbt execute)
         run: |
           echo "Executing dbt run on project: $DBT_PROJECT_NAME"
           
-          # Snowflake側で 'dbt run' を実行
-          # 必要に応じて --args "build" や "--select ..." などを追加可能
-          snow dbt execute --project-name "$DBT_PROJECT_NAME" --command "run"
+          # snow dbt execute <プロジェクト名> <dbtコマンド>
+          snow dbt execute "$DBT_PROJECT_NAME" "run"
 
       - name: Cleanup (Drop Temporary Project)
-        if: always() # 成功・失敗に関わらず実行してゴミを残さない
+        if: always()
         run: |
           echo "Dropping temporary dbt project: $DBT_PROJECT_NAME"
-          snow dbt drop --project-name "$DBT_PROJECT_NAME"
+          
+          # snow dbt drop <プロジェクト名>
+          snow dbt drop "$DBT_PROJECT_NAME"
