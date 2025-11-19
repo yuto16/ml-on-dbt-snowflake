@@ -1,0 +1,9 @@
+sample_dbt_project:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      role: DBT_ROLE
+      warehouse: DBT_WH
+      database: ANALYTICS
+      schema: DBT_SCHEMA
