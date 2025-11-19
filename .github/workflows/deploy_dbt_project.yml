@@ -10,13 +10,13 @@ on:
 env:
   # Snowflake CLI用の環境変数設定
   # connection "WORKFLOW" を定義します
-  SNOWFLAKE_ACCOUNT: ${{ vars.SNOWFLAKE_ACCOUNT }}
-  SNOWFLAKE_USER: ${{ vars.SNOWFLAKE_USER }}
-  SNOWFLAKE_PAT: ${{ secrets.SNOWFLAKE_PAT }}
-  SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
-  SNOWFLAKE_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
-  SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
-  SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
+  SNOWFLAKE_CONNECTIONS_WORKFLOW_ACCOUNT: ${{ vars.SNOWFLAKE_ACCOUNT }}
+  SNOWFLAKE_CONNECTIONS_WORKFLOW_USER: ${{ vars.SNOWFLAKE_USER }}
+  SNOWFLAKE_CONNECTIONS_WORKFLOW_PASSWORD: ${{ secrets.SNOWFLAKE_PAT }}
+  SNOWFLAKE_CONNECTIONS_WORKFLOW_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
+  SNOWFLAKE_CONNECTIONS_WORKFLOW_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
+  SNOWFLAKE_CONNECTIONS_WORKFLOW_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+  SNOWFLAKE_CONNECTIONS_WORKFLOW_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
   
   # CI実行用の一意なプロジェクト名を生成 (例: my_project_pr_123)
   # 既存のプロジェクトと被らないようにします
@@ -35,9 +35,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Snowflake CLI
-        run: |
-          pip install snowflake-cli-labs
+      - name: Install snowflake-cli
+        uses: Snowflake-Labs/snowflake-cli-action@v2.0
+        with:
+          cli-version: "latest"
+          default-config-file-path: 'config/config.toml'
           snow --version
 
       - name: Configure Connection
