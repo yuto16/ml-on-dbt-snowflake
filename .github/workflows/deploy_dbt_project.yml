@@ -10,13 +10,13 @@ on:
 env:
   # Snowflake CLI用の環境変数設定
   # connection "WORKFLOW" を定義します
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_ACCOUNT: ${{ vars.SNOWFLAKE_ACCOUNT }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_USER: ${{ vars.SNOWFLAKE_USER }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_PASSWORD: ${{ secrets.SNOWFLAKE_PAT }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
-  SNOWFLAKE_CONNECTIONS_WORKFLOW_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
+  SNOWFLAKE_ACCOUNT: ${{ vars.SNOWFLAKE_ACCOUNT }}
+  SNOWFLAKE_USER: ${{ vars.SNOWFLAKE_USER }}
+  SNOWFLAKE_PAT: ${{ secrets.SNOWFLAKE_PAT }}
+  SNOWFLAKE_ROLE: ${{ vars.SNOWFLAKE_ROLE }}
+  SNOWFLAKE_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
+  SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+  SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
   
   # CI実行用の一意なプロジェクト名を生成 (例: my_project_pr_123)
   # 既存のプロジェクトと被らないようにします
@@ -39,6 +39,21 @@ jobs:
         run: |
           pip install snowflake-cli-labs
           snow --version
+
+      - name: Configure Connection
+        run: |
+          # ここで "default" という名前の接続を明示的に作成します。
+          # これにより、以降のコマンドはオプションなしでこの接続を使用します。
+          
+          snow connection add \
+            --connection-name default \
+            --account "$SNOWFLAKE_ACCOUNT" \
+            --user "$SNOWFLAKE_USER" \
+            --password "$SNOWFLAKE_PAT" \
+            --role "$SNOWFLAKE_ROLE" \
+            --warehouse "$SNOWFLAKE_WAREHOUSE" \
+            --database "$SNOWFLAKE_DATABASE" \
+            --schema "$SNOWFLAKE_SCHEMA"
 
       - name: Verify Connection
         run: |

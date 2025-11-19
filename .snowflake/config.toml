@@ -1,4 +1,0 @@
-default_connection_name = "workflow"
-
-[connections.workflow]
-
