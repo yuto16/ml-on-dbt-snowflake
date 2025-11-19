@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: raw_jaffle_shop
+    database: RAW
+    schema: JAFFLE_SHOP
+    tables:
+      - name: customers
+      - name: orders
+      - name: order_items
+      - name: products
+      - name: supplies
+      - name: stores
+
+models:
+  # staging/mart models will be defined after stg/mart SQLs are updated
