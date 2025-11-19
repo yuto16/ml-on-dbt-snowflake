@@ -3,4 +3,4 @@
 
 select *
 from {{ ref('my_second_dbt_model') }}
-limit 1
+limit 3
