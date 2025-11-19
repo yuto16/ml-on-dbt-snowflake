@@ -4,8 +4,8 @@ with dim_customers as (
 ),
 fct_orders as (
     select * from {{ ref('fct_orders') }}
-),
-
+)
+,
 customer_lifetime_value as (
     select
         c.customer_id,
@@ -22,4 +22,4 @@ customer_lifetime_value as (
     group by c.customer_id, c.customer_name, c.order_count, c.first_ordered_at, c.last_ordered_at
 )
 
-select * from customer_lifetime_value;
+select * from customer_lifetime_value

@@ -4,8 +4,8 @@ with dim_customers as (
 ),
 fct_orders as (
     select * from {{ ref('fct_orders') }}
-),
-
+)
+,
 customer_features as (
     select
         c.customer_id,
@@ -24,4 +24,4 @@ customer_features as (
     group by c.customer_id, c.customer_name, c.order_count, c.first_ordered_at, c.last_ordered_at
 )
 
-select * from customer_features;
+select * from customer_features
