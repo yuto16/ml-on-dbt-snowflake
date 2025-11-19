@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "顧客ごとの基本情報と注文集計を持つディメンションテーブル。"
+    columns:
+      - name: customer_id
+        description: "顧客ID。ユニークな識別子。"
+      - name: customer_name
+        description: "顧客名。"
+      - name: order_count
+        description: "顧客の注文回数。"
+      - name: first_ordered_at
+        description: "顧客の初回注文日時。"
+      - name: last_ordered_at
+        description: "顧客の最新注文日時。"
+
+  - name: fct_orders
+    description: "注文ごとの詳細情報を持つファクトテーブル。"
+    columns:
+      - name: order_id
+        description: "注文ID。ユニークな識別子。"
+      - name: customer_id
+        description: "注文を行った顧客のID。"
+      - name: ordered_at
+        description: "注文日時。"
+      - name: store_id
+        description: "注文が行われた店舗ID。"
+      - name: subtotal
+        description: "注文の小計金額。"
+      - name: tax_paid
+        description: "注文に対して支払われた税額。"
+      - name: order_total
+        description: "注文の合計金額。"
+      - name: order_item_id
+        description: "注文アイテムID。"
+      - name: sku
+        description: "商品SKU。"
+      - name: product_name
+        description: "商品名。"
+      - name: product_type
+        description: "商品の種別。"
+      - name: price
+        description: "商品の単価。"
+
+  - name: ftr_binary_classification
+    description: "バイナリ分類モデル用の特徴量テーブル。顧客ごとにキャンセル経験有無などの特徴量を持つ。"
+    columns:
+      - name: customer_id
+        description: "顧客ID。ユニークな識別子。"
+      - name: customer_name
+        description: "顧客名。"
+      - name: order_count
+        description: "顧客の注文回数。"
+      - name: first_ordered_at
+        description: "顧客の初回注文日時。"
+      - name: last_ordered_at
+        description: "顧客の最新注文日時。"
+      - name: total_orders
+        description: "顧客の全注文数。"
+      - name: total_spent
+        description: "顧客の合計支払金額。"
+      - name: paid_orders
+        description: "有料注文の回数。"
+      - name: free_orders
+        description: "無料注文の回数。"
+      - name: has_free_order
+        description: "無料注文経験の有無（0/1）。バイナリ分類ターゲット。"
+
+  - name: ftr_regression
+    description: "回帰モデル用の特徴量テーブル。顧客ごとの生涯支払金額などの特徴量を持つ。"
+    columns:
+      - name: customer_id
+        description: "顧客ID。ユニークな識別子。"
+      - name: customer_name
+        description: "顧客名。"
+      - name: order_count
+        description: "顧客の注文回数。"
+      - name: first_ordered_at
+        description: "顧客の初回注文日時。"
+      - name: last_ordered_at
+        description: "顧客の最新注文日時。"
+      - name: total_spent
+        description: "顧客の合計支払金額。"
+      - name: avg_order_value
+        description: "平均注文金額。"
+      - name: target_lifetime_value
+        description: "生涯支払金額（回帰ターゲット）。"
