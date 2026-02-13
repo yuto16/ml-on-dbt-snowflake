@@ -23,7 +23,7 @@
         {{ drop_relation_if_exists(existing_relation) }}
     {% endif %}#}
     {% call statement("main", language=language) -%}
-        {{ dbt_snowflake_ml.snowflake__create_model_as(target_relation, compiled_code, language) }}
+    {{ snowflake__create_model_as(target_relation, compiled_code, language) }}
     {%- endcall %}
 
     {{ run_hooks(post_hooks) }}
@@ -47,7 +47,7 @@
                 "Iceberg is incompatible with Python models. Please use a SQL model for the iceberg format."
             ) %}
         {%- endif %}
-        {{ dbt_snowflake_ml.py_write_model(compiled_code=compiled_code, target_relation=relation) }}
+    {{ py_write_model(compiled_code=compiled_code, target_relation=relation) }}
     {%- else -%}
         {% do exceptions.raise_compiler_error(
             "snowflake__create_model_as macro didn't get supported language, it got %s"

@@ -5,10 +5,11 @@ from snowflake.ml.registry import registry
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
   features = [
-    "order_count",
-    "total_spent",
-    "paid_orders",
-    "free_orders"
+    "ORDER_COUNT",
+    "TOTAL_SPENT",
+    "PAID_ORDERS",
+    "FREE_ORDERS",
+    "TOTAL_ORDERS"
   ]
   return df[features]
 
@@ -27,10 +28,10 @@ def model(dbt, session):
     x = imputer.fit_transform(x)
 
     reg = registry.Registry(session=session)
-    model_ref = dbt.ref("ml_model")
+    model_ref = dbt.ref("ml_bc01_model")
     mv = reg.get_model(model_ref.table_name).default
     # LightGBMのpredictは0/1を返す
     y_pred = mv.run(x, function_name="predict")
-    result = data[["customer_id"]].copy()
-    result["predicted_has_free_order"] = y_pred
+    result = data[["CUSTOMER_ID"]].copy()
+    result["PREDICTED_HAS_FREE_ORDER"] = y_pred
     return result

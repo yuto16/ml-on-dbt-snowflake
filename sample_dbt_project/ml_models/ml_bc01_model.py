@@ -9,10 +9,11 @@ from sklearn.metrics import roc_auc_score
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
   # ftr_binary_classification.sqlのスキーマに合わせて特徴量を選択
   features = [
-      "order_count",
-      "total_spent",
-      "paid_orders",
-      "free_orders"
+    "ORDER_COUNT",
+    "TOTAL_SPENT",
+    "PAID_ORDERS",
+    "FREE_ORDERS",
+    "TOTAL_ORDERS"
   ]
   return df[features]
 
@@ -29,7 +30,7 @@ def model(dbt, session):
   data = dataset.to_pandas()
 
   x = preprocess(data)
-  y = data["has_free_order"]  # 二値分類ターゲット
+  y = data["HAS_FREE_ORDER"]  # 二値分類ターゲット
 
   imputer = SimpleImputer()
   x = imputer.fit_transform(x)
@@ -45,7 +46,7 @@ def model(dbt, session):
   return {
     "model": model,
     "signatures": {"predict": model_signature.infer_signature(x, y)},
-    "version_name": datetime.datetime.today().strftime("V%Y%m%d"),
+    "version_name": datetime.datetime.today().strftime("V%Y%m%d%H%M%S"),
     "metrics": {"auc": auc},
     "comment": f"auc: {auc}",
     "set_default": True,

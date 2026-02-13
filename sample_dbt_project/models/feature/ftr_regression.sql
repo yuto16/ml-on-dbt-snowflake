@@ -8,11 +8,11 @@ fct_orders as (
 ,
 customer_lifetime_value as (
     select
-        c.customer_id,
-        c.customer_name,
-        c.order_count,
-        c.first_ordered_at,
-        c.last_ordered_at,
+        c.customer_id as customer_id,
+        c.customer_name as customer_name,
+        c.order_count as order_count,
+        c.first_ordered_at as first_ordered_at,
+        c.last_ordered_at as last_ordered_at,
         sum(o.order_total) as total_spent,
         avg(o.order_total) as avg_order_value,
         -- Regression target: total spent by customer

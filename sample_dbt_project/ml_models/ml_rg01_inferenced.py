@@ -4,10 +4,9 @@ from snowflake.ml.registry import registry
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     features = [
-        "order_count",
-        "total_spent",
-        "paid_orders",
-        "free_orders"
+        "ORDER_COUNT",
+        "TOTAL_SPENT",
+        "AVG_ORDER_VALUE"
     ]
     return df[features]
 
@@ -26,6 +25,6 @@ def model(dbt, session):
     model_ref = dbt.ref("ml_rg01_model")
     mv = reg.get_model(model_ref.table_name).default
     y_pred = mv.run(x, function_name="predict")
-    result = data[["customer_id"]].copy()
-    result["predicted_lifetime_value"] = y_pred
+    result = data[["CUSTOMER_ID"]].copy()
+    result["PREDICTED_LIFETIME_VALUE"] = y_pred
     return result

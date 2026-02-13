@@ -7,10 +7,9 @@ from sklearn.metrics import r2_score
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     features = [
-        "order_count",
-        "total_spent",
-        "paid_orders",
-        "free_orders"
+        "ORDER_COUNT",
+        "TOTAL_SPENT",
+        "AVG_ORDER_VALUE"
     ]
     return df[features]
 
@@ -23,7 +22,7 @@ def model(dbt, session):
     dataset = dbt.ref("ftr_regression")
     data = dataset.to_pandas()
     x = preprocess(data)
-    y = data["target_lifetime_value"]  # 回帰ターゲット
+    y = data["TARGET_LIFETIME_VALUE"]  # 回帰ターゲット
     imputer = SimpleImputer()
     x = imputer.fit_transform(x)
     model = LGBMRegressor()
@@ -33,7 +32,7 @@ def model(dbt, session):
     return {
         "model": model,
         "signatures": {"predict": model_signature.infer_signature(x, y)},
-        "version_name": datetime.datetime.today().strftime("V%Y%m%d"),
+        "version_name": datetime.datetime.today().strftime("V%Y%m%d%H%M%S"),
         "metrics": {"r2": r2},
         "comment": f"r2: {r2}",
         "set_default": True,
