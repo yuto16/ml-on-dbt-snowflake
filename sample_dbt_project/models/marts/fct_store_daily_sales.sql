@@ -23,8 +23,8 @@ store_daily_sales as (
         count(oi.order_item_id) as item_count,
         coalesce(sum(oi.quantity * p.price), 0) as gross_sales
     from orders_with_date o
-    left join order_items oi on o.order_id = oi.order_id
-    left join products p on oi.sku = p.sku
+    inner join order_items oi on o.order_id = oi.order_id
+    inner join products p on oi.sku = p.sku
     group by o.store_id, o.ordered_date, p.product_type
 )
 
