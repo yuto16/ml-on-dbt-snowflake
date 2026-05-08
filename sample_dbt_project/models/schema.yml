@@ -43,6 +43,22 @@ models:
       - name: price
         description: "商品の単価。"
 
+  - name: fct_store_daily_sales
+    description: "店舗・日次・商品カテゴリ単位の売上集計サンプル。"
+    columns:
+      - name: store_id
+        description: "店舗ID。"
+      - name: ordered_date
+        description: "注文日。"
+      - name: product_type
+        description: "商品のカテゴリ。"
+      - name: order_count
+        description: "注文件数。"
+      - name: item_count
+        description: "注文明細件数。"
+      - name: gross_sales
+        description: "売上金額（数量 × 単価 の合計）。"
+
   - name: ftr_binary_classification
     description: "バイナリ分類モデル用の特徴量テーブル。顧客ごとにキャンセル経験有無などの特徴量を持つ。"
     columns:
