@@ -21,7 +21,7 @@ store_daily_sales as (
         p.product_type,
         count(distinct o.order_id) as order_count,
         count(oi.order_item_id) as item_count,
-        coalesce(sum(case when oi.quantity is not null and p.price is not null then oi.quantity * p.price end), 0) as gross_sales
+        coalesce(sum(oi.quantity * p.price), 0) as gross_sales
     from orders_with_date o
     left join order_items oi on o.order_id = oi.order_id
     left join products p on oi.sku = p.sku
