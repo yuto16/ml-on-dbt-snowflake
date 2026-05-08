@@ -57,7 +57,7 @@ models:
       - name: item_count
         description: "注文明細件数。"
       - name: gross_sales
-        description: "売上金額（単価の合計）。"
+        description: "売上金額（数量 × 単価 の合計）。"
 
   - name: ftr_binary_classification
     description: "バイナリ分類モデル用の特徴量テーブル。顧客ごとにキャンセル経験有無などの特徴量を持つ。"
